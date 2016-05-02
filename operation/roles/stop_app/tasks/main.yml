@@ -1,0 +1,9 @@
+---
+
+- name: Kill app
+  command: '{{ item }}'
+  with_items:
+    - 'supervisorctl -c {{ base_path }}/local/supervisor/conf/default.conf stop all'
+    - killall -9 python
+  ignore_errors: True
+  remote_user: '{{ main_user }}'

@@ -1,0 +1,22 @@
+---
+
+- name: Install yum lib
+  yum: name={{ item }} state=latest
+  with_items:
+    - gcc-c++
+    - openssl
+    - openssl-devel
+    - zlib
+    - zlib-devel
+    - bzip2
+    - bzip2-devel
+    - ntp
+    - libselinux-python
+    - git
+    - mysql-devel
+    - postgresql-devel 
+    - blas-devel #
+    - lapack-devel #
+  remote_user: root
+
+

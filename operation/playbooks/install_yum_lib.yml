@@ -1,0 +1,9 @@
+---
+
+- name: Config base environment
+  hosts: tornado_glearn
+  vars_files:
+    - ../group_vars/all.yml
+
+  roles:
+    - ../roles/install_yum_lib

@@ -1,0 +1,80 @@
+---
+
+- name: Download python
+  get_url: url={{ item }}
+           dest={{ base_path }}/download
+           mode=0775
+  with_items:
+    - http://python.org/ftp/python/2.7.6/Python-2.7.6.tgz
+    - https://pypi.python.org/packages/source/s/setuptools/setuptools-2.0.1.tar.gz
+    - https://pypi.python.org/packages/source/p/pip/pip-1.4.1.tar.gz
+  remote_user: '{{ main_user }}'
+  --no-check-certificate
+
+- name: Remove python decompression directory
+  file: path={{ item }}
+        state=absent
+  with_items:
+    - '{{ base_path }}/download/Python-2.7.6'
+    - '{{ base_path }}/download/setuptools-2.0.1'
+    - '{{ base_path }}/download/pip-1.4.1'
+  remote_user: '{{ main_user }}'
+
+- name: Decompression python
+  command: '{{ item }} chdir={{ base_path }}/download'
+  with_items:
+    - tar -xf Python-2.7.6.tgz
+    - tar -xf setuptools-2.0.1.tar.gz
+    - tar -xf pip-1.4.1.tar.gz
+  remote_user: '{{ main_user }}'
+
+- name: Create python directories
+  file: path='{{ base_path }}/local/python'
+        mode=0775
+        state=directory
+  remote_user: '{{ main_user }}'
+
+- name: Install python
+  command: '{{ item }} chdir={{ base_path }}/download/Python-2.7.6'
+  with_items:
+    - ./configure --prefix={{ base_path }}/local/python/
+    - make
+    - make install
+  remote_user: '{{ main_user }}'
+
+- name: Config python step1
+  lineinfile: line='PATH={{ base_path }}/local/python/bin:$PATH'
+              dest={{ item }}
+              state=present
+              insertafter=EOF
+              create=yes
+  with_items:
+    - '{{ base_path }}/.bashrc'
+    - '{{ base_path }}/.bash_profile'
+  remote_user: '{{ main_user }}'
+
+- name: Config python step2
+  lineinfile: line='export $PATH'
+              dest={{ item }}
+              state=present
+              insertafter=EOF
+              create=yes
+  with_items:
+    - '{{ base_path }}/.bashrc'
+    - '{{ base_path }}/.bash_profile'
+  remote_user: '{{ main_user }}'
+
+- name: Check python version
+  command: python --version
+  register: python_version
+  remote_user: '{{ main_user }}'
+
+- name: Install python setuptools and pip
+  command: python setup.py install chdir={{ item }}
+  with_items:
+    - '{{ base_path }}/download/setuptools-2.0.1'
+    - '{{ base_path }}/download/pip-1.4.1'
+  when: python_version.stderr == 'Python 2.7.6'
+  remote_user: '{{ main_user }}'
+
+

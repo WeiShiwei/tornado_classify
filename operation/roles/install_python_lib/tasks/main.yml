@@ -1,0 +1,25 @@
+---
+
+- name: Check python version
+  command: python --version
+  register: python_version
+  remote_user: '{{ main_user }}'
+
+- name: Install python lib
+  pip: name={{ item }}
+       state=latest
+       extra_args='-i http://pypi.douban.com/simple'
+  with_items:
+    - supervisor
+    - tornado
+    - ujson
+    - redis
+    - sqlalchemy
+    - requests
+    - psycopg2
+    - numpy #
+    - scipy #
+    - scikit-learn #
+  when: python_version.stderr == 'Python 2.7.6'
+  remote_user: '{{ main_user }}'
+

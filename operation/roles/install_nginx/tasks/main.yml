@@ -1,0 +1,56 @@
+---
+
+- name: Download nginx
+  get_url: url={{ item }}
+           dest={{ base_path }}/download
+           mode=0775
+  with_items:
+    - http://nginx.org/download/nginx-1.4.4.tar.gz
+    - http://downloads.sourceforge.net/project/pcre/pcre/8.34/pcre-8.34.tar.gz
+  remote_user: '{{ main_user }}'
+
+- name: Remove nginx decompression directory
+  file: path={{ item }}
+        state=absent
+  with_items:
+    - '{{ base_path }}/download/nginx-1.4.4'
+    - '{{ base_path }}/download/pcre-8.34'
+  remote_user: '{{ main_user }}'
+
+- name: Decompression nginx
+  command: '{{ item }} chdir={{ base_path }}/download'
+  with_items:
+    - tar -xf nginx-1.4.4.tar.gz
+    - tar -xf pcre-8.34.tar.gz
+  remote_user: '{{ main_user }}'
+
+- name: Create nginx directories
+  file: path={{ item }}
+        mode=0775
+        state=directory
+  with_items:
+    - '{{ base_path }}/local/nginx'
+    - '{{ base_path }}/log/nginx'
+  remote_user: '{{ main_user }}'
+
+- name: Kill nginx
+  command: killall -9 nginx
+  ignore_errors: True
+  remote_user: root
+
+- name: Install nginx
+  command: '{{ item }} chdir={{ base_path }}/download/nginx-1.4.4'
+  with_items:
+    - ./configure --prefix={{ base_path }}/local/nginx/ --with-http_stub_status_module --with-http_ssl_module --with-pcre={{ base_path }}/download/pcre-8.34
+    - make
+    - make install
+  remote_user: '{{ main_user }}'
+
+- name: Copy nginx configuration
+  template: src=../../reload_nginx/templates/default.conf
+            dest={{ base_path }}/local/nginx/conf/nginx.conf
+  remote_user: '{{ main_user }}'
+
+- name: Start nginx
+  command: '{{ base_path }}/local/nginx/sbin/nginx'
+  remote_user: root

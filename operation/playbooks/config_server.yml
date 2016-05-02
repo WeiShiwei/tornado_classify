@@ -1,0 +1,14 @@
+---
+
+- name: Config base environment
+  hosts: tornado_classify
+  vars_files:
+    - ../group_vars/all.yml
+
+  roles:
+    #- ../roles/install_yum_lib # root
+    #- ../roles/config_common # 创建用户组、用户，关闭SELINUX，用户获取root的ssh文件，用户主目录创建文件夹
+    #- ../roles/restart_ntp # root
+    #- ../roles/install_nginx # =>
+    - ../roles/install_python #
+    - ../roles/install_python_lib

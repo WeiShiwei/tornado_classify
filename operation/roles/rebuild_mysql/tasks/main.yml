@@ -1,0 +1,9 @@
+---
+
+- name: Rebuild mysql
+  shell: '{{ item }}'
+  with_items:
+    - 'cd {{ base_path }}/src'
+    - 'export PYTHONPATH={{ base_path }}/src API_ENV=production EXTRACTOR_ENV=production MODEL_ENV=production'
+    - '{{ base_path }}/local/python/bin/python template/basic_template_generator.py'
+  remote_user: '{{ main_user }}'

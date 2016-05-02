@@ -1,0 +1,44 @@
+---
+
+- name: Download redis
+  get_url: url=http://download.redis.io/releases/redis-2.8.3.tar.gz
+           dest={{ base_path }}/download
+           mode=0775
+  remote_user: '{{ main_user }}'
+
+- name: Decompression redis
+  command: 'tar -xf redis-2.8.3.tar.gz chdir={{ base_path }}/download'
+  remote_user: '{{ main_user }}'
+
+- name: Create redis directories
+  file: path={{ item }}
+        mode=0775
+        state=directory
+  with_items:
+    - '{{ base_path }}/local/redis'
+    - '{{ base_path }}/local/redis/bin'
+    - '{{ base_path }}/local/redis/conf'
+    - '{{ base_path }}/local/redis/dump'
+    - '{{ base_path }}/log/redis'
+  remote_user: '{{ main_user }}'
+
+- name: Install redis
+  command: '{{ item }} chdir={{ base_path }}/download/redis-2.8.3'
+  with_items:
+    - make
+    - 'cp src/redis-server {{ base_path }}/local/redis/bin'
+    - 'cp src/redis-cli {{ base_path }}/local/redis/bin'
+    - 'cp src/redis-benchmark {{ base_path }}/local/redis/bin'
+    - 'cp src/redis-check-aof {{ base_path }}/local/redis/bin'
+    - 'cp src/redis-check-dump {{ base_path }}/local/redis/bin'
+    - 'cp src/redis-sentinel {{ base_path }}/local/redis/bin'
+    - 'cp src/mkreleasehdr.sh {{ base_path }}/local/redis/bin'
+  remote_user: '{{ main_user }}'
+
+- name: Copy redis configuration
+  template: src=default.conf dest={{ base_path }}/local/redis/conf/default.conf
+  remote_user: '{{ main_user }}'
+
+- name: Start redis
+  command: '{{ base_path }}/local/redis/bin/redis-server {{ base_path }}/local/redis/conf/default.conf'
+  remote_user: '{{ main_user }}'

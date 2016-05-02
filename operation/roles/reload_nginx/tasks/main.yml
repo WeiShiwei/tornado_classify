@@ -1,0 +1,9 @@
+---
+
+- name: Copy nginx configuration
+  template: src=default.conf dest={{ base_path }}/local/nginx/conf/nginx.conf
+  remote_user: '{{ main_user }}'
+
+- name: Reload nginx
+  command: '{{ base_path }}/local/nginx/sbin/nginx -s reload'
+  remote_user: root

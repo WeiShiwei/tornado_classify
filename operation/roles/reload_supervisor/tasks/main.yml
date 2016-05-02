@@ -1,0 +1,12 @@
+---
+
+- name: Copy supervisor configuration
+  template: src=default.conf dest={{ base_path }}/local/supervisor/conf/default.conf
+  remote_user: '{{ main_user }}'
+
+- name: Reload supervisor
+  command: '{{ item }}'
+  with_items:
+    - supervisorctl -c {{ base_path }}/local/supervisor/conf/default.conf reread
+    - supervisorctl -c {{ base_path }}/local/supervisor/conf/default.conf update
+  remote_user: '{{ main_user }}'

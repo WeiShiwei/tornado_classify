@@ -1,0 +1,9 @@
+---
+
+- name: Install app
+  hosts: mysql
+  vars_files:
+    - ../group_vars/all.yml
+
+  roles:
+    - ../roles/rebuild_mysql

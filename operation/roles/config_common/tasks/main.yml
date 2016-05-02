@@ -1,0 +1,34 @@
+---
+
+- name: Add group
+  group: name={{ main_group }}
+  remote_user: root
+
+- name: Add user
+  user: name={{ main_user }} group={{ main_group }}
+  remote_user: root
+
+- name: Disable SELINUX
+  lineinfile: dest=/etc/selinux/config
+              regexp=^SELINUX=
+              line=SELINUX=disabled
+  remote_user: root
+
+# - name: Create SSH Authentication
+#   command: '{{ item }}'
+#   with_items:
+#     - 'cp -r /root/.ssh {{ base_path }}'
+#     - 'chown -R {{ main_user }}:{{ main_group }} {{ base_path }}/.ssh'
+#   remote_user: root
+
+- name: Create directories
+  file: path={{ item }}
+        mode=0775
+        state=directory
+  with_items:
+    - '{{ base_path }}/download'
+    - '{{ base_path }}/local'
+    - '{{ base_path }}/log'
+    - '{{ base_path }}/tmp'
+  remote_user: '{{ main_user }}'
+

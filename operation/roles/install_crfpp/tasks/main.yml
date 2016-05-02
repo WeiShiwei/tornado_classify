@@ -1,0 +1,93 @@
+---
+
+# 远程复制
+- name: scp CRF++-0.58.tar.gz
+  command: 'scp -r {{ ansible_server_user }}@{{ ansible_server_ip }}:{{ tornado_glearn_path }}/glearn/crf/dependence/CRF++-0.58.tar.gz {{ base_path }}/download/CRF++-0.58.tar.gz'
+  remote_user: '{{ main_user }}'
+
+
+- name: Remove crfpp decompression directory
+  file: path={{ item }}
+        state=absent
+  with_items:
+    - '{{ base_path }}/download/CRF++-0.58'
+  remote_user: root
+
+- name: Decompression crfpp
+  command: 'tar -xf CRF++-0.58.tar.gz chdir={{ base_path }}/download'
+  remote_user: '{{ main_user }}'
+
+- name: Create crfpp directories
+  file: path='{{ base_path }}/local/crfpp'
+        mode=0775
+        state=directory
+  remote_user: '{{ main_user }}'
+
+- name: Make crfpp
+  command: '{{ item }} chdir={{ base_path }}/download/CRF++-0.58'
+  with_items:
+    - ./configure --prefix={{ base_path }}/local/crfpp/
+    - make
+    - make install
+  remote_user: '{{ main_user }}' #root
+
+- name: Config crfpp step1
+  lineinfile: line='PATH={{ base_path }}/local/crfpp/bin:$PATH'
+              dest={{ item }}
+              state=present
+              insertafter=EOF
+              create=yes
+  with_items:
+    - '{{ base_path }}/.bashrc'
+    - '{{ base_path }}/.bash_profile'
+  remote_user: '{{ main_user }}'
+
+- name: Config crfpp step2
+  lineinfile: line='export $PATH'
+              dest={{ item }}
+              state=present
+              insertafter=EOF
+              create=yes
+  with_items:
+    - '{{ base_path }}/.bashrc'
+    - '{{ base_path }}/.bash_profile'
+  remote_user: '{{ main_user }}'
+
+
+- name: CRF++ python module build
+  command: '{{ item }} chdir={{ base_path }}/download/CRF++-0.58/python'
+  with_items:
+    - 'python setup.py build'
+  remote_user: '{{ main_user }}'
+
+- name: CRF++ python module installation
+  command: '{{ item }} chdir={{ base_path }}/download/CRF++-0.58/python'
+  with_items:
+    #- 'python setup.py install --prefix={{ base_path }}/local/crfpp/python' #这条命令害惨我了
+    - 'python setup.py install' # 需要非root用户并且没有选项--prefix
+  remote_user: '{{ main_user }}'
+
+
+- name: Config crfpp python step1
+  lineinfile: line='LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:{{ base_path }}/local/crfpp/lib'
+              dest={{ item }}
+              state=present
+              insertafter=EOF
+              create=yes
+  with_items:
+    - '{{ base_path }}/.bashrc'
+    - '{{ base_path }}/.bash_profile'
+  remote_user: '{{ main_user }}'
+
+
+- name: Config crfpp python step2
+  lineinfile: line='export LD_LIBRARY_PATH'
+              dest={{ item }}
+              state=present
+              insertafter=EOF
+              create=yes
+  with_items:
+    - '{{ base_path }}/.bashrc'
+    - '{{ base_path }}/.bash_profile'
+  remote_user: '{{ main_user }}'
+

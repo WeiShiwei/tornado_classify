@@ -1,0 +1,7 @@
+---
+# The global variables
+
+main_user: 'glearn'
+main_group: 'glearn'
+base_path: '/home/{{ main_user }}'
+

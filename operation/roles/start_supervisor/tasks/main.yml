@@ -1,0 +1,29 @@
+---
+
+- name: Create supervisor directories
+  file: path={{ item }}
+        mode=0775
+        state=directory
+  with_items:
+    - '{{ base_path }}/local/supervisor'
+    - '{{ base_path }}/local/supervisor/conf'
+    - '{{ base_path }}/log/supervisor'
+    - '{{ base_path }}/log/app'
+  remote_user: '{{ main_user }}'
+
+- name: Copy supervisor configuration
+  template: src=../../reload_supervisor/templates/default.conf
+            dest={{ base_path }}/local/supervisor/conf/default.conf
+  remote_user: '{{ main_user }}'
+
+- name: Kill supervisor
+  command: '{{ item }}'
+  with_items:
+    - 'supervisorctl -c {{ base_path }}/local/supervisor/conf/default.conf stop all'
+    - killall -9 supervisord
+  ignore_errors: True
+  remote_user: '{{ main_user }}'
+
+- name: Start supervisor
+  command: 'supervisord -c {{ base_path }}/local/supervisor/conf/default.conf'
+  remote_user: '{{ main_user }}'

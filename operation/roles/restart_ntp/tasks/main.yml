@@ -1,0 +1,5 @@
+---
+
+- name: Start ntp
+  service: name=ntpd state=restarted
+  remote_user: root

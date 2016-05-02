@@ -1,0 +1,10 @@
+---
+
+# 远程复制
+- name: Deploy app
+  command: 'scp -r {{ ansible_server_user }}@{{ ansible_server_ip }}:{{ tornado_glearn_path }}/ {{ base_path }}/src'
+  remote_user: '{{ main_user }}'
+
+- name: Restart app
+  command: 'supervisorctl -c {{ base_path }}/local/supervisor/conf/default.conf restart app:*'
+  remote_user: '{{ main_user }}'
