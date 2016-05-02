@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+    <head><title>Classify Predict Test Result</title></head>
+    <body>
+    	<h1>{{file_name}}</h1>
+        <h2>accuracy_score: {{accuracy_score}}</h2>
+        <h2>recall_score: {{recall_score}}</h2>
+        <h2>f1_score: {{f1_score}}</h2>
+
+        <h2>classification_report: </h2>
+        <h2><pre>{{classification_report}}</pre></h2>
+
+        <h2>confusion_matrix: </h2>
+        <h2><pre>{{confusion_matrix}}</pre></h2>
+
+        <h2>error_predict_documents: </h2>
+        <ul>
+            {% for epdoc in error_predict_documents %}
+                <li>
+                <h3>document: {{ epdoc['document'] }} </h3>
+                <h3>ytest: {{ epdoc['ytest'] }} => ypred: {{ epdoc['ypred'] }}</h3>
+                <h3>multi_patterns: {{ epdoc['multi_patterns'] }}</h3>
+                </li>
+            {% end %}
+        </ul>
+    </body>
+</html>
